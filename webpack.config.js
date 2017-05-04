@@ -1,4 +1,5 @@
 const path 							= require('path'),
+			webpack 					= require('webpack'),
 			HtmlWebpackPlugin = require('html-webpack-plugin'),
 			ExtractTextPlugin = require('extract-text-webpack-plugin');
 
@@ -15,14 +16,33 @@ const commonConfig = {
 	      {
 	        test: /\.css$/,
 	        use: ExtractTextPlugin.extract({
-	        	fallback: 'style-loader',
+	        	// fallback: 'style-loader',
 	        	use: [ 
-  	        	'style-loader', 
+  	        	// 'style-loader', 
   	        	'css-loader',
   	        	'postcss-loader', 
   	        ],
   	      }),
 	      },
+				{
+					test: /\.(jpg|png|svg)$/,
+					use: 'file-loader?name=media/[name].[ext]',
+        },				      
+      	{
+	        test: /\.html$/,
+	        use: 'html-loader',
+		    },
+		    {
+		      test: /\.js$/,
+		      exclude: /(node_modules|bower_components)/,
+		      use: {
+		        loader: 'babel-loader',
+		        options: {
+		          presets: ['env', 'react', 'stage-2']
+		        }
+		      }
+		    },
+
 	      // {
 	      //   test: /\.scss$/,
 	      //   use: [ 'style-loader', 'css-loader', 'sass-loader' ],
@@ -30,13 +50,15 @@ const commonConfig = {
 	    ],
 	  },
 		plugins: [
+			new webpack.optimize.UglifyJsPlugin({minimize: true}),
+			new HtmlWebpackPlugin({
+				filename: 'index.html',
+				template: 'app/index.html',
+			}),
 			new ExtractTextPlugin({
 				filename: '[name].css',
 				disable: false,
 				allChunks: true,
-			}),
-			new HtmlWebpackPlugin({
-				title: 'Webpack demo',
 			}),
 		],
 }
@@ -50,7 +72,7 @@ const developmentConfig = () => {
 			stats: 'errors-only', //Less console output - only errors
 			host: process.env.HOST, //default to 'localhost'
 			port: process.env.PORT, //defaults to 8080
-			
+
 			//the overlay will show eslint warnings in the browser and force you to fix them before continuing
 			// overlay: {
 			// 	errors: true,
